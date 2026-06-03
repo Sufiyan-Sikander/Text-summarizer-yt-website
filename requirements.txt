@@ -1,16 +1,14 @@
 Flask
+gunicorn
 python-dotenv
 validators
 
-langchain
-langchain-community
-langchain-groq
-langchain-text-splitters
+requests
+beautifulsoup4
+lxml
 
 youtube-transcript-api
-unstructured
-markdown
 
-lxml
-html5lib
-beautifulsoup4
+langchain-core
+langchain-groq
+langchain-text-splitters
