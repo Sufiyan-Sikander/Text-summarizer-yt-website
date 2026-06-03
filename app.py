@@ -1,32 +1,28 @@
+import os
 import validators
-import streamlit as st
-from langchain_classic.prompts import PromptTemplate
+from dotenv import load_dotenv
+
+from flask import Flask, render_template, request, jsonify
+
 from langchain_groq import ChatGroq
+from langchain_classic.prompts import PromptTemplate
 from langchain_classic.chains.summarize import load_summarize_chain
-from langchain_community.document_loaders import YoutubeLoader, UnstructuredURLLoader
+
+from langchain_community.document_loaders import (
+    YoutubeLoader,
+    UnstructuredURLLoader
+)
+
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-# Streamlit config
-st.set_page_config(
-    page_title="LangChain: Summarize Text From YT or Website",
-    page_icon="🦜"
-)
-st.title("🦜 LangChain: Summarize Text From YT or Website")
-st.subheader("Summarize URL")
+load_dotenv()
 
-# Sidebar
-with st.sidebar:
-    groq_api_key = st.text_input("Groq API Key", type="password")
+app = Flask(__name__)
 
-generic_url = st.text_input("URL", label_visibility="collapsed")
+# -------------------------
+# Prompt Templates
+# -------------------------
 
-# LLM
-llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    groq_api_key=groq_api_key
-)
-
-# MAP prompt
 map_prompt = PromptTemplate(
     template="""
 Summarize the following content clearly and concisely:
@@ -36,88 +32,113 @@ Summarize the following content clearly and concisely:
     input_variables=["text"]
 )
 
-# COMBINE prompt
 combine_prompt = PromptTemplate(
     template="""
 Using the summaries below, generate the following:
 
 1. A detailed English summary of approximately 500 words.
-2. A bullet-point list of key points (in English).
-3. An Urdu translated summary written in simple, easy language.
-4. If the content is from a YouTube video, include approximate timestamps in English only.
+2. A bullet-point list of key points.
+3. A simple Urdu translated summary.
+4. If the content is from YouTube, include timestamps.
 
 Format EXACTLY like this:
 
 ### English Summary
-<English paragraph summary>
+<summary>
 
 ### Key Points
-- Point 1
-- Point 2
-- Point 3
+- point
 
 ### اردو خلاصہ
-<Urdu translated summary>
+<urdu summary>
 
 ### Timestamps (if applicable)
-- 00:00 – Introduction
-- 02:15 – Main topic explained
-- 05:40 – Conclusion
+- 00:00 Topic
 
 {text}
 """,
     input_variables=["text"]
 )
 
+# -------------------------
+# Routes
+# -------------------------
 
-if st.button("Summarize the Content from YT or Website"):
-
-    if not groq_api_key.strip() or not generic_url.strip():
-        st.error("Please provide the information to get started")
-
-    elif not validators.url(generic_url):
-        st.error("Please enter a valid URL")
-
-    else:
-        try:
-            with st.spinner("Fetching & summarizing content..."):
-
-                # Loader selection
-                if "youtube.com" in generic_url or "youtu.be" in generic_url:
-                    loader = YoutubeLoader.from_youtube_url(
-                    generic_url,
-                    add_video_info=False,
-                    language=["en", "hi"]
-                    )
-                else:
-                    loader = UnstructuredURLLoader(
-                        urls=[generic_url],
-                        ssl_verify=False,
-                        headers={"User-Agent": "Mozilla/5.0"}
-                    )
-
-                # Load docs
-                docs = loader.load()
-
-                # Split docs
-                text_splitter = RecursiveCharacterTextSplitter(
-                    chunk_size=1200,
-                    chunk_overlap=200
-                )
-                docs = text_splitter.split_documents(docs)
-
-                # Summarization chain
-                chain = load_summarize_chain(
-                    llm,
-                    chain_type="map_reduce",
-                    map_prompt=map_prompt,
-                    combine_prompt=combine_prompt
-                )
-
-                summary = chain.run(docs)
-                st.markdown("## 📝 Summary")
-                st.markdown(summary)
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 
-        except Exception as e:
-            st.exception(e)
+@app.route("/summarize", methods=["POST"])
+def summarize():
+
+    try:
+        data = request.get_json()
+
+        url = data.get("url")
+        api_key = data.get("groq_api_key")
+
+        if not url:
+            return jsonify({"error": "URL is required"}), 400
+
+        if not api_key:
+            return jsonify({"error": "Groq API Key is required"}), 400
+
+        if not validators.url(url):
+            return jsonify({"error": "Invalid URL"}), 400
+
+        llm = ChatGroq(
+            model="llama-3.1-8b-instant",
+            groq_api_key=api_key
+        )
+
+        # -------------------------
+        # Select Loader
+        # -------------------------
+
+        if "youtube.com" in url or "youtu.be" in url:
+            loader = YoutubeLoader.from_youtube_url(
+                url,
+                add_video_info=False,
+                language=["en", "hi"]
+            )
+        else:
+            loader = UnstructuredURLLoader(
+                urls=[url],
+                ssl_verify=False,
+                headers={
+                    "User-Agent": "Mozilla/5.0"
+                }
+            )
+
+        docs = loader.load()
+
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1200,
+            chunk_overlap=200
+        )
+
+        docs = splitter.split_documents(docs)
+
+        chain = load_summarize_chain(
+            llm,
+            chain_type="map_reduce",
+            map_prompt=map_prompt,
+            combine_prompt=combine_prompt
+        )
+
+        summary = chain.run(docs)
+
+        return jsonify({
+            "success": True,
+            "summary": summary
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": str(e)
+        }), 500
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
