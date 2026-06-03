@@ -1,60 +1,132 @@
-# 🦜 Text Summarizer – YouTube & Website
+AI Content Summarizer
 
-A Streamlit web app that summarizes content from YouTube videos and websites using LangChain and Groq's LLaMA 3.1 model. It provides an English summary, key points, an Urdu translation, and timestamps (for YouTube videos).
+An AI-powered web application that summarizes content from YouTube videos and websites using LangChain, Groq LLMs, and Flask.
 
-## Features
+The application extracts content from a YouTube URL or webpage URL, processes the text using LangChain's Map-Reduce summarization chain, and generates:
 
-- Summarize any YouTube video or website URL
-- Detailed ~500 word English summary
-- Bullet-point key highlights
-- Urdu translated summary (اردو خلاصہ)
-- Approximate timestamps for YouTube videos
-- Powered by Groq LLaMA 3.1 8B Instant
+Detailed English Summary
+Key Points
+Urdu Translation
+Timestamps (for YouTube videos when available)
+Features
+Website Summarization
 
-## Tech Stack
+Extracts and summarizes content from blogs, articles, documentation pages, and websites.
 
-- **Frontend:** Streamlit
-- **LLM:** Groq (LLaMA 3.1 8B Instant)
-- **Framework:** LangChain (map-reduce summarization chain)
-- **Loaders:** YouTube Transcript API, Unstructured URL Loader
+YouTube Video Summarization
 
-## Setup
+Fetches transcripts from YouTube videos and generates concise summaries.
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/<your-username>/text-summarizer-yt-website.git
-   cd text-summarizer-yt-website
-   ```
+AI-Powered Summaries
 
-2. **Create a virtual environment and activate it**
-   ```bash
-   python -m venv venv
-   # Windows
-   venv\Scripts\activate
-   # macOS/Linux
-   source venv/bin/activate
-   ```
+Uses Groq-hosted LLMs through LangChain for fast and accurate summarization.
 
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+Multilingual Output
 
-4. **Run the app**
-   ```bash
-   streamlit run app.py
-   ```
+Provides:
 
-5. **Enter your Groq API key** in the sidebar and paste a YouTube or website URL to get a summary.
+English Summary
+Key Takeaways
+Urdu Summary
+Modern User Interface
+Responsive Design
+Glassmorphism UI
+Loading Indicators
+Markdown Rendering
+Tech Stack
+Backend
+Flask
+LangChain
+Groq API
+YouTube Transcript API
+Unstructured Loader
+Frontend
+HTML5
+CSS3
+JavaScript
+Marked.js
+AI Model
+Llama 3.1 8B Instant
+Project Structure
+project/
+│
+├── app.py
+├── requirements.txt
+├── .env
+│
+├── templates/
+│   └── index.html
+│
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   │
+│   └── js/
+│       └── script.js
+│
+└── README.md
+Installation
+Clone Repository
+git clone https://github.com/yourusername/ai-content-summarizer.git
 
-## Getting a Groq API Key
+cd ai-content-summarizer
+Create Virtual Environment
 
-Sign up at [console.groq.com](https://console.groq.com) and generate a free API key.
+Windows
 
-## Screenshot
+python -m venv venv
 
-<!-- Add a screenshot of the app here -->
+venv\Scripts\activate
 
-## License
+Linux / macOS
 
-This project is open source and available under the [MIT License](LICENSE).
+python3 -m venv venv
+
+source venv/bin/activate
+Install Dependencies
+pip install -r requirements.txt
+Environment Variables
+
+Create a .env file in the root directory.
+
+GROQ_API_KEY=your_groq_api_key
+
+You can obtain a free API key from Groq.
+
+Running the Application
+
+Start the Flask server:
+
+python app.py
+
+Application will be available at:
+
+http://127.0.0.1:5000
+Usage
+Step 1
+
+Open the application in your browser.
+
+Step 2
+
+Enter your Groq API Key.
+
+Step 3
+
+Paste either:
+
+YouTube Video URL
+Website URL
+Step 4
+
+Click:
+
+Generate Summary
+Step 5
+
+View:
+
+Detailed English Summary
+Key Points
+Urdu Translation
+Video Timestamps (if available)
