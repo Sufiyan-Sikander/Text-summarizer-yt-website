@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Content Summarizer</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="glass-card">
+
+        <h1>🦜 AI Content Summarizer</h1>
+
+        <p class="subtitle">
+            Summarize YouTube videos and websites using LangChain + Groq
+        </p>
+
+        <input
+            type="password"
+            id="apiKey"
+            placeholder="Enter Groq API Key"
+        >
+
+        <input
+            type="text"
+            id="url"
+            placeholder="Paste YouTube or Website URL"
+        >
+
+        <button id="summarizeBtn">
+            Generate Summary
+        </button>
+
+        <div id="loader" class="loader hidden"></div>
+
+        <div id="result"></div>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
